@@ -14,7 +14,7 @@ import com.example.no.retakecamera.ui.CameraPreview;
  * <p/>
  * This is the main component through which the app interacts with the camera system.
  */
-public interface CameraPresenter extends CameraControls.EventListener {
+public interface CameraPresenter extends CameraControls.EventListener, CameraSystem.PhotoListener {
 
 
     /**
@@ -22,7 +22,7 @@ public interface CameraPresenter extends CameraControls.EventListener {
      *
      * @param listener a callback listener
      */
-    void setPhotoListener(@Nullable CameraSystem.PhotoListener listener);
+    void setEventListener(@Nullable EventListener listener);
 
     /**
      * Set the controls view which will send events to the presenter.
@@ -57,5 +57,19 @@ public interface CameraPresenter extends CameraControls.EventListener {
      * @return true if the camera started successfully
      */
     boolean startCamera(@NonNull CameraPreview cameraPreview);
+
+
+    /**
+     * Callbacks for events that may need to be handled externally, e.g. the results a 'take photo' operation
+     */
+    interface EventListener {
+
+        /**
+         * Called when a photo has been taken, providing the resulting JPEG image data.
+         * @param data  the image data returned by the camera
+         */
+        void onPhotoTaken(@Nullable byte[] data);
+
+    }
 
 }

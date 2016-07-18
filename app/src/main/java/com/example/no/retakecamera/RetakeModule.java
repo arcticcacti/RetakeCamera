@@ -3,6 +3,7 @@ package com.example.no.retakecamera;
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 
 import com.example.no.retakecamera.camera.Camera1;
@@ -68,6 +69,13 @@ class RetakeModule {
     @Singleton
     ImageProcessor providesImageProcessor() {
         return new ImageProcessorImpl();
+    }
+
+
+    @Provides
+    @Singleton
+    PhotoStorage providesPhotoStorage(Context context) {
+        return new PhotoStorageImpl(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM));
     }
 
 

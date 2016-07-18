@@ -13,9 +13,9 @@ import android.widget.Toast;
 
 import com.example.no.retakecamera.CameraPresenter;
 import com.example.no.retakecamera.ImageProcessor;
+import com.example.no.retakecamera.PhotoStorage;
 import com.example.no.retakecamera.R;
 import com.example.no.retakecamera.RetakeApplication;
-import com.example.no.retakecamera.camera.CameraSystem;
 import com.example.no.retakecamera.permissions.PermissionsManager;
 
 import javax.inject.Inject;
@@ -46,6 +46,8 @@ public class CameraActivity extends AppCompatActivity {
     CameraPresenter cameraPresenter;
     @Inject
     ImageProcessor imageProcessor;
+    @Inject
+    PhotoStorage photoStorage;
 
     // views
     @BindView(R.id.camera_preview)
@@ -64,7 +66,7 @@ public class CameraActivity extends AppCompatActivity {
         // get the required views and injected components, and wire them up
         ButterKnife.bind(this);
         ((RetakeApplication) getApplication()).getInjector().inject(this);
-        cameraPresenter.setPhotoListener(new PhotoHandler());
+        cameraPresenter.setEventListener(new PhotoHandler());
         cameraPresenter.setCameraControls(cameraControls);
     }
 
@@ -72,6 +74,7 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        // TODO: 18/07/2016 check for WRITE permission too, for saving photos
         // start the camera if we have the permission, otherwise request it
         if (permissionsManager.hasPermission(CAMERA)) {
             startCamera();
@@ -119,32 +122,43 @@ public class CameraActivity extends AppCompatActivity {
 
     /**
      * Basic handler for image data when a photo is taken.
-     * // TODO: 09/07/2016 implement saving, and move this into a separate interface/implementation
      */
-    class PhotoHandler implements CameraSystem.PhotoListener {
+    class PhotoHandler implements CameraPresenter.EventListener {
 
         @Override
         public void onPhotoTaken(final byte[] data) {
             new AsyncTask<Void, Void, Bitmap>() {
                 @Override
                 protected Bitmap doInBackground(Void... params) {
-                    // save the image, then make a bitmap
-                    saveImage(data);
+                    // generate the bitmap
                     return imageProcessor.getBitmap(data);
                 }
 
 
                 @Override
                 protected void onPostExecute(Bitmap bitmap) {
-                    // display the bitmap in the activity
+                    // save and display the bitmap in the activity
+                    save(bitmap);
                     photoThumbnail.setImageBitmap(bitmap);
                 }
             }.execute();
         }
 
+        private void save(final Bitmap bitmap) {
+            new AsyncTask<Void, Void, Boolean>() {
+                @Override
+                protected Boolean doInBackground(Void... params) {
+                    // attempt to save the bitmap
+                    return photoStorage.save(bitmap);
+                }
 
-        private void saveImage(byte[] data) {
-            // TODO: 09/07/2016 implement saving the photo
+
+                @Override
+                protected void onPostExecute(Boolean success) {
+                    // TODO: 17/07/2016 handle failure properly
+                    Toast.makeText(getApplicationContext(), "Photo save " + (success ? "successful" : "failed!"), Toast.LENGTH_SHORT).show();
+                }
+            }.execute();
         }
 
     }

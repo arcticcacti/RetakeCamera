@@ -25,10 +25,6 @@ public class Camera1 implements CameraSystem {
     @Nullable
     private SurfaceHolder previewSurfaceHolder = null;
 
-    @Nullable
-    private
-    PhotoListener photoListener;
-
     private boolean takingPhoto = false;
 
 
@@ -115,23 +111,15 @@ public class Camera1 implements CameraSystem {
 
 
     @Override
-    public void setPhotoListener(@Nullable PhotoListener photoListener) {
-        this.photoListener = photoListener;
-    }
-
-
-    @Override
-    public void takePhoto() {
-        if (camera != null && !takingPhoto) {
+    public void takePhoto(@NonNull final PhotoListener photoListener) {
+        if (camera != null && previewRunning && !takingPhoto) {
             takingPhoto = true;
             camera.takePicture(null, null, null, new Camera.PictureCallback() {
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
                     startPreview();
                     takingPhoto = false;
-                    if (photoListener != null) {
-                        photoListener.onPhotoTaken(data);
-                    }
+                    photoListener.onPhotoTaken(data);
                 }
             });
         }

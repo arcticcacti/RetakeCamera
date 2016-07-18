@@ -24,6 +24,9 @@ public class CameraPresenterImpl implements CameraPresenter {
     @Nullable
     private CameraControls controls;
 
+    @Nullable
+    private EventListener eventListener;
+
 
     @Inject
     public CameraPresenterImpl(@NonNull CameraSystem cameraSystem) {
@@ -42,9 +45,10 @@ public class CameraPresenterImpl implements CameraPresenter {
     }
 
 
+    // TODO: 12/07/2016 should there always be a photo listener? Does it need to be possible to switch it out?
     @Override
-    public void setPhotoListener(@Nullable CameraSystem.PhotoListener listener) {
-        cameraSystem.setPhotoListener(listener);
+    public void setEventListener(@Nullable EventListener listener) {
+        eventListener = listener;
     }
 
 
@@ -63,8 +67,14 @@ public class CameraPresenterImpl implements CameraPresenter {
 
     @Override
     public void onShutterPressed() {
-        cameraSystem.takePhoto();
+        cameraSystem.takePhoto(this);
     }
 
 
+    @Override
+    public void onPhotoTaken(byte[] data) {
+        if (eventListener != null) {
+            eventListener.onPhotoTaken(data);
+        }
+    }
 }

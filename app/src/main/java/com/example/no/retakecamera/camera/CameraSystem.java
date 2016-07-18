@@ -48,14 +48,15 @@ public interface CameraSystem {
      */
     void setPreview(@Nullable SurfaceHolder holder);
 
-    /**
-     * Set a listener to receive the results of a {@link #takePhoto()} call.
-     *
-     * @param photoListener the listener, or null to clear
-     */
-    void setPhotoListener(@Nullable PhotoListener photoListener);
 
-    void takePhoto();
+    /**
+     * Take a photo, passing the result to the provided listener.
+     *
+     * The call will be handled asynchronously, and the listener called when it returns.
+     *
+     * @param photoListener the handler for the resulting image
+     */
+    void takePhoto(PhotoListener photoListener);
 
     /**
      * Interface for components which handle the results of a 'take photo' call
