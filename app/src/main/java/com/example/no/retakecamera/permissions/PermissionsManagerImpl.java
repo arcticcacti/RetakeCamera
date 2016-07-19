@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.SparseArray;
 
 /**
  * Created by Lee Holmes on 07/07/2016.
@@ -18,6 +19,16 @@ public class PermissionsManagerImpl implements PermissionsManager {
 
     private final Context context;
 
+    /**
+     * a mapping of internal permission IDs to the equivalent Android permission strings
+     */
+    private final SparseArray<String> permissionStrings = new SparseArray<>();
+
+    {
+        permissionStrings.append(CAMERA, Manifest.permission.CAMERA);
+        permissionStrings.append(SAVE_IMAGES, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+    }
+
 
     public PermissionsManagerImpl(@NonNull Context context) {
         this.context = context;
@@ -25,32 +36,22 @@ public class PermissionsManagerImpl implements PermissionsManager {
 
 
     @Override
-    public boolean hasPermission(int type) {
-        if (type == CAMERA) {
-            int permission = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA);
-            return permission == PackageManager.PERMISSION_GRANTED;
-        } else {
+    public boolean hasPermission(@Permission int type) {
+        // check if we handle this permission - if so, see if it has been granted
+        String permissionString = permissionStrings.get(type);
+        if (permissionString == null) {
             return false;
         }
+        int permission = ContextCompat.checkSelfPermission(context, permissionString);
+        return permission == PackageManager.PERMISSION_GRANTED;
     }
 
 
     @Override
-    public void requestPermission(int type, @NonNull Activity activity) {
-        if (type == CAMERA) {
-            requestCameraPermission(activity);
+    public void requestPermission(@Permission int type, @NonNull Activity activity) {
+        String permissionString = permissionStrings.get(type);
+        if (permissionString != null) {
+            ActivityCompat.requestPermissions(activity, new String[]{permissionString}, type);
         }
-    }
-
-
-    /**
-     * Request permission to access the device's cameras.
-     *
-     * @param activity the activity which will receive the result of the request
-     */
-    private void requestCameraPermission(@NonNull final Activity activity) {
-        ActivityCompat.requestPermissions(activity,
-                new String[]{Manifest.permission.CAMERA},
-                CAMERA);
     }
 }

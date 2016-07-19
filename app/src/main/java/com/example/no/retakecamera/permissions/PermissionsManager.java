@@ -15,6 +15,7 @@ import java.lang.annotation.RetentionPolicy;
 public interface PermissionsManager {
 
     int CAMERA = 1;
+    int SAVE_IMAGES = 2;
 
     /**
      * Check if a particular permission is currently granted.
@@ -37,7 +38,7 @@ public interface PermissionsManager {
     void requestPermission(@Permission int type, @NonNull Activity activity);
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({CAMERA})
+    @IntDef({CAMERA, SAVE_IMAGES})
     @interface Permission {
     }
 

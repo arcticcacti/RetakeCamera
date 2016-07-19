@@ -17,6 +17,10 @@ import com.example.no.retakecamera.PhotoStorage;
 import com.example.no.retakecamera.R;
 import com.example.no.retakecamera.RetakeApplication;
 import com.example.no.retakecamera.permissions.PermissionsManager;
+import com.example.no.retakecamera.permissions.PermissionsManager.Permission;
+
+import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -24,6 +28,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.example.no.retakecamera.permissions.PermissionsManager.CAMERA;
+import static com.example.no.retakecamera.permissions.PermissionsManager.SAVE_IMAGES;
 
 /**
  * Main camera view activity, holding a preview and the camera's controls UI.
@@ -39,7 +44,9 @@ import static com.example.no.retakecamera.permissions.PermissionsManager.CAMERA;
  */
 public class CameraActivity extends AppCompatActivity {
 
-    // injected components, for non-instrumented unit testing
+    /** the permissions required for this app to function correctly */
+    private static final List<Integer> REQUIRED_PERMISSIONS = Arrays.asList(CAMERA, SAVE_IMAGES);
+
     @Inject
     PermissionsManager permissionsManager;
     @Inject
@@ -49,7 +56,6 @@ public class CameraActivity extends AppCompatActivity {
     @Inject
     PhotoStorage photoStorage;
 
-    // views
     @BindView(R.id.camera_preview)
     CameraPreview cameraPreview;
     @BindView(R.id.camera_controls)
@@ -74,13 +80,7 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        // TODO: 18/07/2016 check for WRITE permission too, for saving photos
-        // start the camera if we have the permission, otherwise request it
-        if (permissionsManager.hasPermission(CAMERA)) {
-            startCamera();
-        } else {
-            permissionsManager.requestPermission(CAMERA, this);
-        }
+        checkPermissionsAndStartCamera();
     }
 
 
@@ -94,11 +94,21 @@ public class CameraActivity extends AppCompatActivity {
 
 
     /**
-     * Put the camera system into the running state.
+     * Check the app's required permissions, and start the camera if they're all granted.
      * <p/>
-     * This should only be called once permissions have been verified!
+     * If a permission has not been granted, an attempt will be made to request it from the user.
+     * The result will be returned to {@link #onRequestPermissionsResult(int, String[], int[])},
+     * which should call this method again if the request was successful.
      */
-    private void startCamera() {
+    private void checkPermissionsAndStartCamera() {
+        for (int permission : REQUIRED_PERMISSIONS) {
+            if (!permissionsManager.hasPermission(permission)) {
+                // there's a permission we need - request it and abort the check (check again when we get the result)
+                permissionsManager.requestPermission(permission, this);
+                return;
+            }
+        }
+        // we only reach this if every required permission has been granted
         boolean success = cameraPresenter.startCamera(cameraPreview);
         if (!success) {
             Toast.makeText(this, "Couldn't start the camera", Toast.LENGTH_LONG).show();
@@ -109,13 +119,28 @@ public class CameraActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        // handle the results of a permissions request
-        if (requestCode == CAMERA) {
+        // handle the results of requests for permissions we require
+        if (REQUIRED_PERMISSIONS.contains(requestCode)) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                startCamera();
+                // when a permission is granted, try to start the camera
+                checkPermissionsAndStartCamera();
             } else {
-                new AlertDialog.Builder(this).setMessage("App cannot function without camera permissions!").show();
+                showPermissionsError(requestCode);
             }
+        }
+    }
+
+
+    /**
+     * Display an error when a required permission isn't granted by the user.
+     *
+     * @param permissionType the ungranted permission
+     */
+    private void showPermissionsError(@Permission int permissionType) {
+        if (permissionType == CAMERA) {
+            new AlertDialog.Builder(this).setMessage("This app requires permission to use the camera!").show();
+        } else if (permissionType == SAVE_IMAGES) {
+            new AlertDialog.Builder(this).setMessage("This app requires permission to save images!").show();
         }
     }
 
@@ -143,6 +168,7 @@ public class CameraActivity extends AppCompatActivity {
                 }
             }.execute();
         }
+
 
         private void save(final Bitmap bitmap) {
             new AsyncTask<Void, Void, Boolean>() {
