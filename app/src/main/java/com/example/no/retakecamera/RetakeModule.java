@@ -12,6 +12,8 @@ import com.example.no.retakecamera.camera.CameraProviderImpl;
 import com.example.no.retakecamera.camera.CameraSystem;
 import com.example.no.retakecamera.permissions.PermissionsManager;
 import com.example.no.retakecamera.permissions.PermissionsManagerImpl;
+import com.example.no.retakecamera.util.Logger;
+import com.example.no.retakecamera.util.LoggerImpl;
 
 import javax.inject.Singleton;
 
@@ -76,6 +78,13 @@ class RetakeModule {
     @Singleton
     PhotoStorage providesPhotoStorage(Context context) {
         return new PhotoStorageImpl(context, Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM));
+    }
+
+
+    @Provides
+    @Singleton
+    Logger providesLogger() {
+        return new LoggerImpl();
     }
 
 

@@ -12,7 +12,7 @@ public class RetakeApplication extends Application {
 
     public static final int CAMERA_2_MIN_API = android.os.Build.VERSION_CODES.LOLLIPOP;
 
-    private Injector injector;
+    private static Injector injector = null;
 
 
     /**
@@ -21,7 +21,7 @@ public class RetakeApplication extends Application {
      * @return The app's DI injector
      */
     @NonNull
-    public Injector getInjector() {
+    public static Injector getInjector() {
         return injector;
     }
 
@@ -29,7 +29,7 @@ public class RetakeApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        injector = DaggerInjector.builder()
+        RetakeApplication.injector = DaggerInjector.builder()
                 .retakeModule(new RetakeModule(this))
                 .build();
     }

@@ -71,7 +71,7 @@ public class CameraActivity extends AppCompatActivity {
 
         // get the required views and injected components, and wire them up
         ButterKnife.bind(this);
-        ((RetakeApplication) getApplication()).getInjector().inject(this);
+        RetakeApplication.getInjector().inject(this);
         cameraPresenter.setEventListener(new PhotoHandler());
         cameraPresenter.setCameraControls(cameraControls);
     }
