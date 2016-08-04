@@ -1,0 +1,10 @@
+# RetakeCamera
+A basic Android camera app, built using Dagger 2.
+
+This project is an exploration of dependency injection (using Dagger 2) and its effect on unit and instrumentation tests. As such, it's structured heavily around interfaces and concrete implementations. It (broadly) uses a Model-View-Presenter architecture, to limit the amount of code in classes reliant on the Android framework, and to make the system event-driven and composable.
+
+The app itself is currently a very basic camera - a shutter button takes a photo, a thumbnail preview is displayed and the bitmap is saved to the device's photo storage. A presenter coordinates events and callbacks between the various components, allowing the bulk of the work to be removed from the Activity for ease of testing. The Activity is basically responsible for initialising the UI components, and telling the presenter to start and stop the camera system in response to lifecycle events (e.g. the app moving to the foreground).
+
+The presenter handles input events (e.g. 'shutter clicked') and forwards them to the camera system, handling response events and calling the appropriate listeners. The camera system is an abstraction of a hardware camera and its state, managing the lifecycle details and interactions with the preview surface, allowing simple failsafe operations like *start/stop* and *take a photo*. Once the photo is taken, the presenter passes it to a listener component - in this implementation, one that saves it to media storage and displays the thumbnail. This could easily be swapped for components which do some fancy image processing, or send the photo to another app with an intent, or upload it somewhere, for example.
+
+Some functionality which relies on the Android framework is difficult to test, e.g. the current permissions granted to the app can be reset manually (or through a script) but apparently not through the Android test runner itself. Ideally tests for these aspects will be added, one way or another!
