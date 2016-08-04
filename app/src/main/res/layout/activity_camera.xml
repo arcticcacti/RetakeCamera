@@ -6,12 +6,12 @@
     >
 
 
-    <com.example.no.retakecamera.ui.CameraPreviewImpl
+    <com.github.arcticcacti.retakecamera.ui.CameraPreviewImpl
         android:id="@+id/camera_preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
-    <com.example.no.retakecamera.ui.CameraControlsImpl
+    <com.github.arcticcacti.retakecamera.ui.CameraControlsImpl
         android:id="@+id/camera_controls"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

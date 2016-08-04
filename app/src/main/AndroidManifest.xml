@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest package="com.example.no.retakecamera"
+<manifest package="com.github.arcticcacti.retakecamera"
           xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
     <application
-        android:name=".RetakeApplication"
+        android:name="com.github.arcticcacti.retakecamera.RetakeApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".ui.CameraActivity"
+            android:name="com.github.arcticcacti.retakecamera.ui.CameraActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:screenOrientation="landscape"
